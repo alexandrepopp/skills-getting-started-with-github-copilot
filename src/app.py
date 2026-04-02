@@ -20,7 +20,7 @@ app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
           "static")), name="static")
 
 # In-memory activity database
-activities = {
+INITIAL_ACTIVITIES = {
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
         "schedule": "Fridays, 3:30 PM - 5:00 PM",
@@ -77,6 +77,9 @@ activities = {
     }
 }
 
+# Copy for runtime modifications
+activities = {k: {**v, "participants": v["participants"].copy()} for k, v in INITIAL_ACTIVITIES.items()}
+
 
 @app.get("/")
 def root():
@@ -129,3 +132,11 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+@app.post("/reset")
+def reset_activities():
+    """Reset all activities to initial state (for testing)"""
+    global activities
+    activities = {k: {**v, "participants": v["participants"].copy()} for k, v in INITIAL_ACTIVITIES.items()}
+    return {"message": "Activities reset to initial state"}
